@@ -47,6 +47,7 @@ The ultimate goal was to combine Land Surface Temperature (to represent heat isl
 The land surface temperature required performing raster calculations in QGIS. 
 #### Top of Atmosphere Spectral Radiance
 First, the digital number (DN) observed by the sensor needed to be scaled to represent the amount of radiation (emitted, reflected and scattered) at the top of the atmosphere reaching the sensor. This just involves using sensor multiplicative and additive values found in the imagery's metadata.
+
 $$L_{\lambda} = ML * Q_{cal} + AL $$
 $L_{\lambda}:$ TOA Spectral Radiance
 $ML, AL:$ Multiplicative and additive scaling factors (from sensor metadata) 
@@ -54,12 +55,14 @@ $Q_{cal}:$ Digital Number (DN) from sensor
 
 #### Brightness Temperature
 Then, the brightness temperature is derived from the TOA radiance using the sensor's thermal imaging band using the sensor's specific calibration parameters.
+
 $$ T_{BT} = \frac{K_{2}}{ln( \frac{K_{1}}{L_{\lambda}} + 1) } $$
 $T_{BT}:$ Brightness Temperature
 $K_{1}, K_{2}:$ Thermal conversion constants (from sensor metadata)
 
 #### Fractional Vegetation Cover & Normalized Difference Vegetation Index
 Fractional vegetation cover is the proportion of a region covered by vegetation. It is derived from Normalized Difference Vegetation Index (NDVI), which is a measure that estimates the vegetation of a region of a remote image based on the difference in reflectance observed in healthy plants between the red wavelengths and near-infrared wavelengths of light.
+
 $$NDVI = \frac{NIR - Red}{NIR + Red}$$
 $NDVI:$ Normalized Difference Vegetation Index
 $NIR:$ Near-infrared spectral band (Band 5 for Landsat 8)
@@ -70,6 +73,7 @@ $f_{v}:$ Fractional vegetation cover.
 
 #### Emissivity
 Emissivity is a measure of a surface's efficiency in emitting thermal radiation. It depends on the qualities of the surface, and dense vegetation tends to have higher emissivity. The measure is based on fractional vegetation cover.
+
 $$\epsilon = \epsilon_{v}*f_{v} + \epsilon_{s}*(1-f_{v})$$
 $\epsilon:$ Emissivity
 $\epsilon_{v}:$ Vegetation emissivity, typically 0.98 for dense vegetation
@@ -78,6 +82,7 @@ $\epsilon_{s}:$ Soil emissivity, typically 0.92 for bare soil
 #### Land Surface Temperature
 Finally, with the above factors calculated, the land surface temperature could be determined. 
 (Final LST result shown in the results section above).
+
 $$LST = \frac{T_{BT}} {1 + (\frac{\lambda * T_{BT}} {\rho}*ln(\epsilon))}$$
 $LST:$ Land surface temperature
 $\rho:$ Radiation constant, derived from Planck's constant
