@@ -1,18 +1,36 @@
 # Toronto Urban Heat Island Vulnerability Analysis
-[Read the results on StoryMaps](https://storymaps.com/stories/ac363812a8e146f6b4d61aea3fd55a83)
+**Explore the interactive results:** [Heat Vulnerability in Toronto StoryMap](https://storymaps.com/stories/ac363812a8e146f6b4d61aea3fd55a83)
 
 ![](images/vulerability-zoomed.png)
 
 ## Overview
-The objective of this project was to use raster analysis of remote sensor imagery to measure which neighbourhoods of Toronto, Canada experience the worst "Urban Heat Islands" and to combine that with census data to determine which neighbourhoods experience the worst "Heat Vulnerability."
+This project analyzes Toronto's urban heat islands (UHIs) using remote sensing and geospatial techniques. By assessing land surface temperatures and overlaying demographic data, it identifies neighbourhoods most affected by UHIs and highlights areas with vulnerable populations.
 
-The urban heat island effect is a when a local area has a significantly higher temperature due to several factors in the immediate environment, including nearby water, nearby vegetation, the reflectivity of the nearby surfaces, and more. It can be measured by calculating the local surface temperature of the Earth, which can be done from satellite imagery.
+The urban heat island effect is a when a local area has a significantly higher temperature due to several factors in the immediate environment, including nearby water, nearby vegetation, and more. Extreme heat is the largest weather related killer, and can exacerbate cardiovascular conditions. Several social and demographic factors can put some people at higher risk of heat related negative health outcomes.
 
-Extreme heat is the largest weather related killer, and can exacerbate cardiovascular conditions. Several social and demographic factors can put some people at higher risk of heat related negative health outcomes.
+## Tools & Tech & Skills
+- QGIS, Landsat 8 Imagery, Raster Calculation, Spectral Band Analysis
 
-Heat Vulnerability is a measure that combines local urban heat islands and demographic factors to determine which areas are at greatest overall risk of heat related negative health outcomes. It is not a universal measure.
+## Methodology
+This analysis identified **Urban Heat Islands** in Toronto by leveraging remote sensing and geospatial techniques in **QGIS**.
+**1. Data Acquisition**
+- ***Satellite imagery:*** Acquire from Landsat 8, Collection 2 imagery, dated August 22, 2024
+- ***Demographic data:*** Sourced from the 2021 Canadian Census, accessed via the City of Toronto Open Data Portal
 
-## Results & Key Takeaways
+**2. Heat Island Raster Analysis**
+- ***Clipping & Reprojection:*** Aligned data sets to common CRS.
+- ***Surface Temperature Estimation:*** Extracted Land Surface Temperature (LST) using spectral band data by first calculating TOA radiance, brightness temperature, NDVI, fractional vegetation cover, and emissivity (More info in StoryMaps).
+- ***Zonal Statistics:*** Identified high temperatures neighbourhoods by applying zonal statistics on land surface temperature raster.
+
+**3. Demographic Overlay**
+- ***Demographic Factor Mapping:*** Mapped several heat sensitivity factors to Toronto neighbourhoods including age, income, housing suitability, immigration status and outdoor commuting.
+- ***Heat Sensitivity Mapping:*** Computed overall heat sensitivity and combined with LST to create map of most vulnerable areas.
+
+**4. Visualization & Insights**
+- ***Thematic Mapping in QGIS:*** Designed heat maps with custom symbology to highlight critical UHI areas and demographic sensitivity.
+- ***StoryMap Narrative:*** Findings were presented using [StoryMaps](https://storymaps.com/stories/ac363812a8e146f6b4d61aea3fd55a83) to contextualize results with real-world impacts.
+
+## Results
 Neighbourhoods with **highest average surface temperature** are:
 
     Humber Summit
@@ -20,11 +38,7 @@ Neighbourhoods with **highest average surface temperature** are:
     Weston-Pelham Park
     Dovercourt Village
     Briar Hill-Belgravia
-    Corso Italia-Davenport
-    Yorkdale-Glen Park
-    Oakwood Village
-    Palmerston-Little Italy
-    Trinity-Bellwoods
+
 
 Neighbourhoods with **highest average heat vulnerability** are:
 
@@ -33,96 +47,12 @@ Neighbourhoods with **highest average heat vulnerability** are:
     Kensington-Chinatown
     Bay-Cloverhill
     Yonge-Bay Corridor
-    Church-Wellesley
-    Yonge-Doris
-    Newtonbrook West
-    York University Heights
-    Black Creek
-![](images/lst.png) ***Land Surface Temperature(LST)** in the GTA (from Landsat 8 imagery taken August 13, 2024)* ![](images/vulnerability-osm-labels.png) ***Overall Heat Vulnerability** in the GTA based on LST and demographic factors*
 
-## Process
-The ultimate goal was to combine Land Surface Temperature (to represent heat islands) and Heat Sensitivity (a combination of demographic factors). To do this, land surface temperature needed to be calculated information in the Landsat 8 imagery, and numerous demographic factors needed to be normalized.
+![](images/lst.png) ***Land Surface Temperature(LST)** in the GTA (from Landsat 8 imagery taken August 13, 2024)* 
+![](images/d-sensitivity.png) ***Overall Heat Sensitivity** in the GRA based on several demographic factors*
+![](images/vulnerability-osm-labels.png) ***Overall Heat Vulnerability** in the GTA based on LST and demographic factors*
 
-### Finding the Land Surface Temperature
-The land surface temperature required performing raster calculations in QGIS. 
-#### Top of Atmosphere Spectral Radiance
-First, the digital number (DN) observed by the sensor needed to be scaled to represent the amount of radiation (emitted, reflected and scattered) at the top of the atmosphere reaching the sensor. This just involves using sensor multiplicative and additive values found in the imagery's metadata.
-
-$$L_{\lambda} = ML * Q_{cal} + AL $$
-
-$L_{\lambda}:$ TOA Spectral Radiance
-$ML, AL:$ Multiplicative and additive scaling factors (from sensor metadata) 
-$Q_{cal}:$ Digital Number (DN) from sensor
-
-#### Brightness Temperature
-Then, the brightness temperature is derived from the TOA radiance using the sensor's thermal imaging band using the sensor's specific calibration parameters.
-
-$$ T_{BT} = \frac{K_{2}}{ln( \frac{K_{1}}{L_{\lambda}} + 1) } $$
-
-$T_{BT}:$ Brightness Temperature
-$K_{1}, K_{2}:$ Thermal conversion constants (from sensor metadata)
-
-#### Fractional Vegetation Cover & Normalized Difference Vegetation Index
-Fractional vegetation cover is the proportion of a region covered by vegetation. It is derived from Normalized Difference Vegetation Index (NDVI), which is a measure that estimates the vegetation of a region of a remote image based on the difference in reflectance observed in healthy plants between the red wavelengths and near-infrared wavelengths of light.
-
-$$NDVI = \frac{NIR - Red}{NIR + Red}$$
-
-$NDVI:$ Normalized Difference Vegetation Index
-$NIR:$ Near-infrared spectral band (Band 5 for Landsat 8)
-$Red:$ Red spectral band (Band 4 for Landsat 8)
-
-$$f_{v} = (\frac{NDVI-NDVI_{min}}{NDVI_{max}-NDVI_{min}})^2$$
-$f_{v}:$ Fractional vegetation cover.
-
-#### Emissivity
-Emissivity is a measure of a surface's efficiency in emitting thermal radiation. It depends on the qualities of the surface, and dense vegetation tends to have higher emissivity. The measure is based on fractional vegetation cover.
-
-$$\epsilon = \epsilon_{v}*f_{v} + \epsilon_{s}*(1-f_{v})$$
-
-$\epsilon:$ Emissivity
-$\epsilon_{v}:$ Vegetation emissivity, typically 0.98 for dense vegetation
-$\epsilon_{s}:$ Soil emissivity, typically 0.92 for bare soil
-
-#### Land Surface Temperature
-Finally, with the above factors calculated, the land surface temperature could be determined. 
-(Final LST result shown in the results section above).
-
-$$LST = \frac{T_{BT}} {1 + (\frac{\lambda * T_{BT}} {\rho}*ln(\epsilon))}$$
-
-$LST:$ Land surface temperature
-$\rho:$ Radiation constant, derived from Planck's constant
-
-### Processing Demographic Data
-There is not a universal definition for heat sensitivity. This analysis used several factors found in census data, but there are absolutely other factors that can affect one's sensitivity to extreme heat related health outcomes.
-
-The factors included in this analysis were:
-1. **Age** - Percentage of residents over 65 years of age
-2. **Income** - Percentage of residents with 'Low Income Measure After Tax (LIM-AT)' status
-3. **Housing Suitability** - Percentage of residents in housing with insufficient bedrooms for the number housed
-4. **Immigration** - Percentage of immigrants or non-permanent residents (due to marginalization, these groups often have worse access to healthcare and other sensitivity affecting factors)
-5. **Outdoor Commute** - Percentage of residents who do not commute by private automobile
-
-Here are the maps representing these factors, in the order listed above.
-![](images/d-65.png)![](images/d-lim.png)![](images/d-housing.png)![](images/d-immigration.png)![](images/d-commute.png)
-
-When normalized and averaged, this created a 'heat sensitivity' map of neighbourhoods.
-![](images/d-sensitivity.png)
-
-## Conclusion
-With the land surface temperature and heat sensitivity calculated, the last steps were to use zonal statistics to average LST by neighbourhood and combine. The result was a map of heat vulnerability in Toronto. 
-
-To read the full story, check out the article written for this project on [StoryMaps](https://storymaps.com/stories/ac363812a8e146f6b4d61aea3fd55a83).
-
-**Going Further**
-This analysis only used remote sensing imagery from one day - a more complete analysis would incorporate imagery from months or years to better average out the typical locations of urban heat islands and observe the change in heat islands over time. 
-
-## Attribution
-**Tools Used**
-- QGIS
-- USGS Earth Explorer
-- StoryMaps
-
-**Data Used**
+## Data Sources
 - Remote Imagery - Landsat 8, Collection 2, USGS, [Earth Explorer](https://earthexplorer.usgs.gov/)
 - Neighbourhood Boundary - Toronto Open Data, [Neighbourhood Boundaries Dataset](https://open.toronto.ca/dataset/neighbourhoods/)
 - Neighbourhood Demographics - Toronto Open Data, [Neighbourhood Profiles Dataset (2021)](https://open.toronto.ca/dataset/neighbourhood-profiles/)
