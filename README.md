@@ -10,6 +10,7 @@ The urban heat island effect is a when a local area has a significantly higher t
 
 ## Tools & Tech & Skills
 - QGIS, Landsat 8 Imagery, Raster Calculation, Spectral Band Analysis
+- Given the large nature of imagery files, they are not provided in this repo
 
 ## Methodology
 This analysis identified **Urban Heat Islands** in Toronto by leveraging remote sensing and geospatial techniques in **QGIS**.
