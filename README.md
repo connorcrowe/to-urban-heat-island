@@ -1,4 +1,4 @@
-# Toronto Urban Heat Island Vulnerability Analysis
+# 🌆 Toronto Urban Heat Island Vulnerability Analysis
 **Explore the interactive results:** [Heat Vulnerability in Toronto StoryMap](https://storymaps.com/stories/ac363812a8e146f6b4d61aea3fd55a83)
 
 ![](images/vulerability-zoomed.png)
